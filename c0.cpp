@@ -35,19 +35,18 @@ vector<string> seperate_words(const string line, string separate_char = ",") {
 	return words;
 }
 
-vector<Place> get_command_line(int argc, char const* argv[])
-{
+vector<Place> get_command_line(int argc, char const* argv[]) {
 	ifstream instream;
 	instream.open(argv[1]);
-	if (instream.fail())
-	{
+	if (instream.fail()) {
 		cout << "Input file opening failed.\n";
 		exit(1);
 	}
 	vector<string> lines;
 	string temp;
-	while (getline(instream, temp))
+	while (getline(instream, temp)) {
 		lines.push_back(temp);
+	}
 	instream.close();
 	vector<string> title = seperate_words(lines[0]);
 	vector<Place> Places;
@@ -152,8 +151,7 @@ void print_place(Place plc, Time start_time, Time end_time) {
 	cout << "---" << endl;
 }
 
-Time skip_time(const vector<Place> Places, Time now)
-{
+Time skip_time(const vector<Place> Places, Time now) {
 	int index = find_first_open_time(Places, now);
 	Time skiped_time = { -1,-1 };
 	if ( index == -1)
