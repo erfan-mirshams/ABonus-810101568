@@ -19,7 +19,7 @@ struct Place {
 	bool have_gone;
 };
 
-bool sort_by_rank(Place i, Place j) {
+bool compare_rank(const Place &i, const Place &j) {
 	return i.rank < j.rank;
 }
 
@@ -67,7 +67,7 @@ vector<Place> get_command_line(int argc, char const* argv[])
 		temp.have_gone = false;
 		Places.push_back(temp);
 	}
-	sort(Places.begin(), Places.end(), sort_by_rank);
+	sort(Places.begin(), Places.end(), compare_rank);
 	return Places;
 }
 
