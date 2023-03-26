@@ -23,7 +23,7 @@ bool sort_by_rank(Places i, Places j) {
 	return i.rank < j.rank;
 }
 
-vector<string> seperateWords(const string line, string separate_char = ",") {
+vector<string> seperate_words(const string line, string separate_char = ",") {
 	vector<string> words;
 	string temp = line;
 	size_t pos = 0;
@@ -49,15 +49,15 @@ vector<Places> get_command_line(int argc, char const* argv[])
 	while (getline(instream, temp))
 		lines.push_back(temp);
 	instream.close();
-	vector<string> title = seperateWords(lines[0]);
 	vector<Places> Placess;
+	vector<string> title = seperate_words(lines[0]);
 	int name_index = distance(title.begin(), find(title.begin(), title.end(), "name"));
 	int rank_index = distance(title.begin(), find(title.begin(), title.end(), "rank"));
 	int opentime_index = distance(title.begin(), find(title.begin(), title.end(), "openingTime"));
 	int closetime_index = distance(title.begin(), find(title.begin(), title.end(), "closingTime"));
 	for (int i = 1; i < lines.size(); i++) {
 		Places temp;
-		vector<string> words_in_line = seperateWords(lines[i]);
+		vector<string> words_in_line = seperate_words(lines[i]);
 		temp.name = words_in_line[name_index];
 		temp.rank = stoi(words_in_line[rank_index]);
 		temp.open_time.hour = stoi(words_in_line[opentime_index]);
