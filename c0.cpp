@@ -11,6 +11,7 @@
 #define RANK_COLUMN "rank"
 #define OPENING_TIME_COLUMN "openingTime"
 #define CLOSING_TIME_COLUMN "closingTime"
+#define MINUTES_IN_HOUR 60
 using namespace std;
 
 struct Time {
@@ -96,24 +97,24 @@ vector<Place> get_places(const vector<string> &lines) {
 }
 
 int during_time(Place plc, Time now) {
-	return (plc.close_time.hour - now.hour) * 60 + (plc.close_time.minute - now.minute);
+	return (plc.close_time.hour - now.hour) * MINUTES_IN_HOUR + (plc.close_time.minute - now.minute);
 }
 
 Time add_time(Time now, int during_time) {
-	if (during_time >= 60) {
+	if (during_time >= MINUTES_IN_HOUR) {
 		now.hour += 1;
 		return now;
 	}
 	now.minute += during_time;
-	if (now.minute >= 60) {
+	if (now.minute >= MINUTES_IN_HOUR) {
 		now.hour++;
-		now.minute -= 60;
+		now.minute -= MINUTES_IN_HOUR;
 	}
 	return now;
 }
 
 bool is_time_greater(Time t1, Time t2) {
-	if (t1.hour * 60 + t1.minute >= t2.hour * 60 + t2.minute)
+	if (t1.hour * MINUTES_IN_HOUR + t1.minute >= t2.hour * MINUTES_IN_HOUR + t2.minute)
 		return true;
 	return false;
 }
