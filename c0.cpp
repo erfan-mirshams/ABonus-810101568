@@ -155,16 +155,10 @@ int find_best_place_index(const vector<Place> Places, const Time now) {
 }
 
 string time_to_string(Time t) {
-	string str;
-	if (t.hour < 10)
-		str += "0" + to_string(t.hour);
-	else
-		str += to_string(t.hour);
+	string str = "";
+	str += (t.hour < 10 ? "0" : "") + to_string(t.hour);
 	str += ":";
-	if (t.minute < 10)
-		str += "0" + to_string(t.minute);
-	else
-		str += to_string(t.minute);
+	str += (t.minute < 10 ? "0" : "") + to_string(t.minute);
 	return str;
 }
 
