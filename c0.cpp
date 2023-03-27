@@ -4,6 +4,13 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+
+#define CLOCK_MINUTE_THRESHOLD 3
+#define INPUT_ERROR_MSG "Input file opening failed."
+#define NAME_COLUMN "name"
+#define RANK_COLUMN "rank"
+#define OPENING_TIME_COLUMN "openingTime"
+#define CLOSING_TIME_COLUMN "closingTime"
 using namespace std;
 
 struct Time {
@@ -18,6 +25,11 @@ struct Place {
 	Time close_time;
 	bool have_gone;
 };
+
+void throw_error(string msg) {
+	cout << msg << endl;
+	exit(1);
+}
 
 bool compare_rank(const Place &i, const Place &j) {
 	return i.rank < j.rank;
@@ -35,12 +47,28 @@ vector<string> seperate_words(const string line, string separate_char = ",") {
 	return words;
 }
 
-vector<Place> get_command_line(int argc, char const* argv[]) {
+Time create_time(string time_string) {
+	Time temp;
+	temp.hour = stoi(time_string);
+	temp.minute = stoi(time_string.substr(CLOCK_MINUTE_THRESHOLD));
+	return temp;
+}
+
+Place create_place(string name, int rank, Time opentime, Time closetime, bool have_gone = false) {
+	Place temp;
+	temp.name = name;
+	temp.rank = rank;
+	temp.open_time = opentime;
+	temp.close_time = closetime;
+	temp.have_gone = have_gone;
+	return temp;
+}
+
+vector<string> get_input_lines(int argc, char const* argv[]) {
 	ifstream instream;
 	instream.open(argv[1]);
 	if (instream.fail()) {
-		cout << "Input file opening failed.\n";
-		exit(1);
+		throw_error(INPUT_ERROR_MSG);
 	}
 	vector<string> lines;
 	string temp;
@@ -48,25 +76,22 @@ vector<Place> get_command_line(int argc, char const* argv[]) {
 		lines.push_back(temp);
 	}
 	instream.close();
+	return lines;
+}
+
+vector<Place> get_places(const vector<string> &lines) {
 	vector<string> title = seperate_words(lines[0]);
 	vector<Place> Places;
-	int name_index = distance(title.begin(), find(title.begin(), title.end(), "name"));
-	int rank_index = distance(title.begin(), find(title.begin(), title.end(), "rank"));
-	int opentime_index = distance(title.begin(), find(title.begin(), title.end(), "openingTime"));
-	int closetime_index = distance(title.begin(), find(title.begin(), title.end(), "closingTime"));
+	int name_index = distance(title.begin(), find(title.begin(), title.end(), NAME_COLUMN));
+	int rank_index = distance(title.begin(), find(title.begin(), title.end(), RANK_COLUMN));
+	int opentime_index = distance(title.begin(), find(title.begin(), title.end(), OPENING_TIME_COLUMN));
+	int closetime_index = distance(title.begin(), find(title.begin(), title.end(), CLOSING_TIME_COLUMN));
 	for (int i = 1; i < lines.size(); i++) {
 		Place temp;
 		vector<string> words_in_line = seperate_words(lines[i]);
-		temp.name = words_in_line[name_index];
-		temp.rank = stoi(words_in_line[rank_index]);
-		temp.open_time.hour = stoi(words_in_line[opentime_index]);
-		temp.open_time.minute = stoi(words_in_line[opentime_index].substr(3));
-		temp.close_time.hour = stoi(words_in_line[closetime_index]);
-		temp.close_time.minute = stoi(words_in_line[closetime_index].substr(3));
-		temp.have_gone = false;
+		temp = create_place(words_in_line[name_index], stoi(words_in_line[rank_index]), create_time(words_in_line[opentime_index]), create_time(words_in_line[closetime_index]));
 		Places.push_back(temp);
 	}
-	sort(Places.begin(), Places.end(), compare_rank);
 	return Places;
 }
 
@@ -191,7 +216,8 @@ void where_to_go(vector<Place> Places) {
 
 int main(int argc, char const* argv[])
 {
-	vector<Place> Places = get_command_line(argc, argv);
+	vector<Place> Places = get_places(get_input_lines(argc, argv));
+	sort(Places.begin(), Places.end(), compare_rank);
 	where_to_go(Places);
 	return 0;
 }
