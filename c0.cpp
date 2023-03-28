@@ -119,8 +119,7 @@ bool is_time_greater(Time t1, Time t2) {
 	return false;
 }
 
-int find_first_open_time(const vector<Place> Places, Time start_time = { 0,0 })
-{
+int find_first_open_time(const vector<Place> Places, Time start_time = {0, 0}) {
 	int index = -1;
 	int i;
 	for (i = 0; i < Places.size(); i++)
@@ -129,11 +128,15 @@ int find_first_open_time(const vector<Place> Places, Time start_time = { 0,0 })
 			break;
 		}
 	for (int j = i + 1; j < Places.size(); j++) {
-		if (Places[j].open_time.hour < Places[index].open_time.hour && is_time_greater(Places[j].open_time, start_time)) {
+		if (Places[j].open_time.hour < Places[index].open_time.hour &&
+			is_time_greater(Places[j].open_time, start_time)) {
 			index = j;
 			continue;
 		}
-		if (Places[j].open_time.hour == Places[index].open_time.hour && Places[j].open_time.minute < Places[index].open_time.minute && is_time_greater(Places[j].open_time, start_time))
+		if (Places[j].open_time.hour == Places[index].open_time.hour &&
+			Places[j].open_time.minute <
+			Places[index].open_time.minute &&
+			is_time_greater(Places[j].open_time, start_time))
 			index = j;
 	}
 	return index;
@@ -173,12 +176,12 @@ void print_place(Place plc, Time start_time, Time end_time) {
 
 Time skip_time(const vector<Place> Places, Time now) {
 	int index = find_first_open_time(Places, now);
-	Time skiped_time = { -1,-1 };
+	Time skipped_time = { -1,-1 };
 	if ( index == -1)
-		return skiped_time;
+		return skipped_time;
 	else {
-		skiped_time = Places[index].open_time;
-		return skiped_time;
+		skipped_time = Places[index].open_time;
+		return skipped_time;
 	}
 }
 
