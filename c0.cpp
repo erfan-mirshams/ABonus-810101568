@@ -114,9 +114,7 @@ Time add_time(Time now, int during_time) {
 }
 
 bool is_time_greater(Time t1, Time t2) {
-	if (t1.hour * MINUTES_IN_HOUR + t1.minute >= t2.hour * MINUTES_IN_HOUR + t2.minute)
-		return true;
-	return false;
+	return (t1.hour * MINUTES_IN_HOUR + t1.minute >= t2.hour * MINUTES_IN_HOUR + t2.minute);
 }
 
 int find_first_open_time(const vector<Place> Places, Time start_time = {0, 0}) {
@@ -146,13 +144,12 @@ int find_best_place_index(const vector<Place> Places, const Time now) {
 	int index = -1;
 	if (now.minute == -1) {
 		index = find_first_open_time(Places);
+		return index;
 	}
-	else {
-		for ( int i = 0; i < Places.size(); i++) {
-			if (!Places[i].have_gone && during_time(Places[i], now) >= 15 && is_time_greater(now, Places[i].open_time)) {
-				index = i;
-				return index;
-			}
+	for (int i = 0; i < Places.size(); i++) {
+			if (!Places[i].have_gone && during_time(Places[i], now) >= (MINUTES_IN_HOUR / 4) && is_time_greater(now, Places[i].open_time)) {
+			index = i;
+			return index;
 		}
 	}
 	return index;
