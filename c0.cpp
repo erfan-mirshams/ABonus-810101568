@@ -137,7 +137,7 @@ int find_best_place_index(const vector<Place> places, const Time now) {
 		return index;
 	}
 	for (int i = 0; i < places.size(); i++) {
-			if (!places[i].have_gone && during_time(places[i], now) >= (MINUTES_IN_HOUR / 4) && is_time_greater(now, places[i].open_time)) {
+		if (!places[i].have_gone && during_time(places[i], now) >= (MINUTES_IN_HOUR / 4) && is_time_greater(now, places[i].open_time)) {
 			index = i;
 			return index;
 		}
