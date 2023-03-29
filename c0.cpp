@@ -36,13 +36,13 @@ bool compare_rank(const Place &i, const Place &j) {
 	return i.rank < j.rank;
 }
 
-vector<string> seperate_words(const string line, string separate_char = ",") {
+vector<string> seperate_words(const string line, string delim = ",") {
 	vector<string> words;
 	string temp = line;
 	size_t pos = 0;
-	while ((pos = temp.find(separate_char)) != string::npos) {
-		words.push_back(temp.substr(0, pos));
-		temp.erase(0, pos + separate_char.length());
+	while ((pos = temp.find(delim)) != string::npos) {
+		words.push_back(temp.substr(0, temp.find(delim)));
+		temp.erase(0, pos + delim.length());
 	}
 	words.push_back(temp);
 	return words;
@@ -82,7 +82,7 @@ vector<string> get_input_lines(int argc, char const* argv[]) {
 
 vector<Place> get_places(const vector<string> &lines) {
 	vector<string> title = seperate_words(lines[0]);
-	vector<Place> Places;
+	vector<Place> places;
 	int name_index = distance(title.begin(), find(title.begin(), title.end(), NAME_COLUMN));
 	int rank_index = distance(title.begin(), find(title.begin(), title.end(), RANK_COLUMN));
 	int opentime_index = distance(title.begin(), find(title.begin(), title.end(), OPENING_TIME_COLUMN));
@@ -92,9 +92,9 @@ vector<Place> get_places(const vector<string> &lines) {
 		vector<string> words_in_line = seperate_words(lines[i]);
 		temp = create_place(words_in_line[name_index], stoi(words_in_line[rank_index]),
 							create_time(words_in_line[opentime_index]), create_time(words_in_line[closetime_index]));
-		Places.push_back(temp);
+		places.push_back(temp);
 	}
-	return Places;
+	return places;
 }
 
 int during_time(Place plc, Time now) {
@@ -103,7 +103,7 @@ int during_time(Place plc, Time now) {
 
 Time add_time(Time now, int during_time) {
 	if (during_time >= MINUTES_IN_HOUR) {
-		now.hour += 1;
+		now.hour++;
 		return now;
 	}
 	now.minute += during_time;
@@ -118,11 +118,11 @@ bool is_time_greater(Time t1, Time t2) {
 	return (t1.hour * MINUTES_IN_HOUR + t1.minute >= t2.hour * MINUTES_IN_HOUR + t2.minute);
 }
 
-int find_first_open_time(const vector<Place> Places, Time start_time = {0, 0}) {
+int find_first_open_time(const vector<Place> places, Time start_time = {0, 0}) {
 	int index = -1;
-	for (int i = 0; i < Places.size(); i++) {
-		if (is_time_greater(Places[i].open_time, start_time)) {
-			if(index == -1 || (is_time_greater(Places[index].open_time, Places[i].open_time))) {
+	for (int i = 0; i < places.size(); i++) {
+		if (is_time_greater(places[i].open_time, start_time)) {
+			if(index == -1 || (is_time_greater(places[index].open_time, places[i].open_time))) {
 				index = i;
 			}
 		}
@@ -130,14 +130,14 @@ int find_first_open_time(const vector<Place> Places, Time start_time = {0, 0}) {
 	return index;
 }
 
-int find_best_place_index(const vector<Place> Places, const Time now) {
+int find_best_place_index(const vector<Place> places, const Time now) {
 	int index = -1;
 	if (now.minute == -1) {
-		index = find_first_open_time(Places);
+		index = find_first_open_time(places);
 		return index;
 	}
-	for (int i = 0; i < Places.size(); i++) {
-			if (!Places[i].have_gone && during_time(Places[i], now) >= (MINUTES_IN_HOUR / 4) && is_time_greater(now, Places[i].open_time)) {
+	for (int i = 0; i < places.size(); i++) {
+			if (!places[i].have_gone && during_time(places[i], now) >= (MINUTES_IN_HOUR / 4) && is_time_greater(now, places[i].open_time)) {
 			index = i;
 			return index;
 		}
@@ -161,50 +161,45 @@ string print_place_value(Place plc, Time start_time, Time end_time) {
 	return val;
 }
 
-Time skip_time(const vector<Place> Places, Time now) {
-	int index = find_first_open_time(Places, now);
+Time skip_time(const vector<Place> places, Time now) {
+	int index = find_first_open_time(places, now);
 	Time skipped_time = {-1, -1};
 	if (index == -1) {
 		return skipped_time;
 	}
 	else {
-		skipped_time = Places[index].open_time;
+		skipped_time = places[index].open_time;
 		return skipped_time;
 	}
 }
 
-void where_to_go(vector<Place> Places) {
+void where_to_go(vector<Place> places) {
 	Time now = {-1, -1};
 	Time end_time;
-	for (int i = 0; i < Places.size(); i++) {
-		int index = find_best_place_index(Places, now);
+	for (int i = 0; i < places.size(); i++) {
+		int index = find_best_place_index(places, now);
 		if (index == -1) {
-			now = skip_time(Places, add_time(now, 1));
-			if (now.hour == -1)
+			now = skip_time(places, add_time(now, 1));
+			if (now.hour == -1) {
 				break;
-			else {
-				i = i - 1;
-				continue;
 			}
+			index = find_best_place_index(places, now);
 		}
 		if (now.minute == -1) {
-			now.hour = Places[index].open_time.hour;
-			now.minute = Places[index].open_time.minute;
-			end_time = add_time(now, during_time(Places[index], now));
+			now.hour = places[index].open_time.hour;
+			now.minute = places[index].open_time.minute;
 		}
-		else {
-			end_time = add_time(now, during_time(Places[index], now));
-		}
-		Places[index].have_gone = true;
-		cout << print_place_value(Places[index], now, end_time);
+		end_time = add_time(now, during_time(places[index], now));
+		places[index].have_gone = true;
+		cout << print_place_value(places[index], now, end_time);
 		now = add_time(end_time, MINUTES_IN_HOUR / 2);
 	}
 }
 
 int main(int argc, char const* argv[])
 {
-	vector<Place> Places = get_places(get_input_lines(argc, argv));
-	sort(Places.begin(), Places.end(), compare_rank);
-	where_to_go(Places);
+	vector<Place> places = get_places(get_input_lines(argc, argv));
+	sort(places.begin(), places.end(), compare_rank);
+	where_to_go(places);
 	return 0;
 }
