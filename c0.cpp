@@ -90,7 +90,8 @@ vector<Place> get_places(const vector<string> &lines) {
 	for (int i = 1; i < lines.size(); i++) {
 		Place temp;
 		vector<string> words_in_line = seperate_words(lines[i]);
-		temp = create_place(words_in_line[name_index], stoi(words_in_line[rank_index]), create_time(words_in_line[opentime_index]), create_time(words_in_line[closetime_index]));
+		temp = create_place(words_in_line[name_index], stoi(words_in_line[rank_index]),
+							create_time(words_in_line[opentime_index]), create_time(words_in_line[closetime_index]));
 		Places.push_back(temp);
 	}
 	return Places;
@@ -119,23 +120,12 @@ bool is_time_greater(Time t1, Time t2) {
 
 int find_first_open_time(const vector<Place> Places, Time start_time = {0, 0}) {
 	int index = -1;
-	int i;
-	for (i = 0; i < Places.size(); i++)
+	for (int i = 0; i < Places.size(); i++) {
 		if (is_time_greater(Places[i].open_time, start_time)) {
-			index = i;
-			break;
+			if(index == -1 || (is_time_greater(Places[index].open_time, Places[i].open_time))) {
+				index = i;
+			}
 		}
-	for (int j = i + 1; j < Places.size(); j++) {
-		if (Places[j].open_time.hour < Places[index].open_time.hour &&
-			is_time_greater(Places[j].open_time, start_time)) {
-			index = j;
-			continue;
-		}
-		if (Places[j].open_time.hour == Places[index].open_time.hour &&
-			Places[j].open_time.minute <
-			Places[index].open_time.minute &&
-			is_time_greater(Places[j].open_time, start_time))
-			index = j;
 	}
 	return index;
 }
@@ -157,25 +147,26 @@ int find_best_place_index(const vector<Place> Places, const Time now) {
 
 string time_to_string(Time t) {
 	string str = "";
-	str += (t.hour < 10 ? "0" : "") + to_string(t.hour);
-	str += ":";
-	str += (t.minute < 10 ? "0" : "") + to_string(t.minute);
+	str += (t.hour < 10 ? "0" : "") + to_string(t.hour) + ":" + (t.minute < 10 ? "0" : "") + to_string(t.minute);
 	return str;
 }
 
-void print_place(Place plc, Time start_time, Time end_time) {
+string print_place_value(Place plc, Time start_time, Time end_time) {
+	string val = "";
 	string start = time_to_string(start_time);
 	string end = time_to_string(end_time);
-	cout << "Location " << plc.name << endl;
-	cout << "Visit from " << start << " until " << end << endl;
-	cout << "---" << endl;
+	val += "Location" + plc.name + "\n";
+	val += "Visit from " + start + " until" + end + "\n";
+	val += "---\n";
+	return val;
 }
 
 Time skip_time(const vector<Place> Places, Time now) {
 	int index = find_first_open_time(Places, now);
-	Time skipped_time = { -1,-1 };
-	if ( index == -1)
+	Time skipped_time = {-1, -1};
+	if (index == -1) {
 		return skipped_time;
+	}
 	else {
 		skipped_time = Places[index].open_time;
 		return skipped_time;
@@ -183,11 +174,11 @@ Time skip_time(const vector<Place> Places, Time now) {
 }
 
 void where_to_go(vector<Place> Places) {
-	Time now = { -1,-1 };
+	Time now = {-1, -1};
 	Time end_time;
 	for (int i = 0; i < Places.size(); i++) {
 		int index = find_best_place_index(Places, now);
-		if ( index == -1) {
+		if (index == -1) {
 			now = skip_time(Places, add_time(now, 1));
 			if (now.hour == -1)
 				break;
@@ -196,16 +187,17 @@ void where_to_go(vector<Place> Places) {
 				continue;
 			}
 		}
-		if ( now.minute == -1) {
+		if (now.minute == -1) {
 			now.hour = Places[index].open_time.hour;
 			now.minute = Places[index].open_time.minute;
 			end_time = add_time(now, during_time(Places[index], now));
 		}
-		else
+		else {
 			end_time = add_time(now, during_time(Places[index], now));
+		}
 		Places[index].have_gone = true;
-		print_place(Places[index], now, end_time);
-		now = add_time(end_time, 30);
+		cout << print_place_value(Places[index], now, end_time);
+		now = add_time(end_time, MINUTES_IN_HOUR / 2);
 	}
 }
 
